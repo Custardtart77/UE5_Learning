@@ -11,6 +11,7 @@ UBoxComponent* TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerB
 
 ### 代码里面读取
     // 使用ConstructorHelpers::FObjectFinder读取Obect对象，再将CubeVisualAsset.Object赋予SetStaticMesh
+    // 是初始化默认资源的简单方法，通常用于小型资源加载
     static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 
     if (CubeVisualAsset.Succeeded())
@@ -31,6 +32,39 @@ UBoxComponent* TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerB
     }
     
     CubeMesh->SetMaterial(0, CorrectCubeMaterial);
+
+
+    // 动态加载资源时，选择LoadObject或者异步加载工具
+    CubeMesh->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Path/mesh.mesh")));
+    // 或者
+    // UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Path/mesh.mesh"));
+    // CubeMesh->SetStaticMesh(StaticMesh);
+
+    UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/StarterContent/Shapes/Shape_Sphere"));
+    if (StaticMesh)
+    {
+        TestMesh->SetStaticMesh(StaticMesh);
+    }
+    // UMaterialInstance* CorrectCubeMaterialInstance = LoadObject<UMaterialInstance>(nullptr, TEXT("/Game/StarterContent/Shapes/Shape_Sphere"));
+    UMaterial* CorrectCubeMaterial = LoadObject<UMaterial>(nullptr, TEXT("/Game/StarterContent/Materials/M_Basic_Floor"));
+
+    if (CorrectCubeMaterial)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "Hello");
+        TestMesh->SetMaterial(0, CorrectCubeMaterial);
+    }
+    else
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "Fail");
+    }
+
+
+    // 更底层的加载类型需求StaticLoadObject
+
+    // 仅查找内存对象FindObject，如果确信资源已加载，可以使用FindObject以提高性能
+    比如新建的材质球，第一次使用就用FindObject，就可能读不到
+
+    // 使用FStreamableManager的异步加载功能
 
 ## 创建材质、UI控件类型等
 
